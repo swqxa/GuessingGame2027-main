@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode: personal settings and build products
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Package Manager (not used yet, but safe to ignore)
+.build/
+.swiftpm/
+
+# Archives and exported apps
+*.ipa
+*.dSYM.zip
+*.dSYM
