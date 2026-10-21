@@ -22,6 +22,8 @@ import SwiftUI
 let lowestNumber: Int = 1
 let highestNumber: Int = 100
 
+let maximumGuesses: Int = 7
+
 // The game itself: what it remembers, what it shows on the screen,
 // and what it does when you click a button.
 struct GuessingGameView: View {
@@ -128,7 +130,7 @@ struct GuessingGameView: View {
 
             HStack {
                 Image(systemName: "list.number")
-                Text("Guesses so far: \(guessCount)")
+                Text("Guesses so far: \(guessCount) of \(maximumGuesses)")
             }
             .font(.headline)
             .foregroundStyle(Color.secondary)
@@ -161,6 +163,14 @@ struct GuessingGameView: View {
             message = "\(guess) is not my number. Try again."
             messageSymbol = "hand.thumbsdown.fill"
             messageColor = Color.orange
+        }
+        
+        // Out of guesses, and still not right? Then the game is over.
+        if guess != secretNumber && guessCount >= maximumGuesses {
+            message = "Out of guesses! My number was \(secretNumber)."
+            messageSymbol = "xmark.octagon.fill"
+            messageColor = Color.gray
+            gameIsOver = true
         }
     }
 
