@@ -146,7 +146,14 @@ struct GuessingGameView: View {
     }
 
     // MARK: - Functions
-
+    // Calculates the distance between the current guess and the secret number
+    func distance(from currentGuess: Int, to targetSecret: Int) -> Int {
+        if currentGuess > targetSecret {
+            return currentGuess - targetSecret
+        } else {
+            return targetSecret - currentGuess
+        }
+    }
     // Checks the player's guess against the secret number.
     func checkGuess() {
         guessCount += 1
