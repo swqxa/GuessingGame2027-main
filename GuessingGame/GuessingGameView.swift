@@ -149,8 +149,6 @@ struct GuessingGameView: View {
 
     // Checks the player's guess against the secret number.
     func checkGuess() {
-
-        // One more guess has been made.
         guessCount += 1
 
         if guess == secretNumber {
@@ -159,20 +157,32 @@ struct GuessingGameView: View {
             messageColor = Color.green
             gameIsOver = true
         } else {
-            // TRY: Change this message. Make it kinder, or sillier.
-            message = "\(guess) is not my number. Try again."
-            messageSymbol = "hand.thumbsdown.fill"
-            messageColor = Color.orange
+            // Calculate distance using our helper function
+            let howFarAway: Int = distance(from: guess, to: secretNumber)
+            
+            if howFarAway <= 5 {
+                message = "\(guess) is hot! (very close)"
+                messageSymbol = "flame.fill"
+                messageColor = Color.red
+            } else if howFarAway <= 15 {
+                message = "\(guess) is warmer (coming closer)"
+                messageSymbol = "thermometer.medium"
+                messageColor = Color.orange
+            } else {
+                message = "\(guess) is cold (far away)"
+                messageSymbol = "snowflake"
+                messageColor = Color.blue
+            }
         }
         
-        // Out of guesses, and still not right? Then the game is over.
         if guess != secretNumber && guessCount >= maximumGuesses {
-            message = "Out of guesses! My number was \(secretNumber)."
+            message = "out of guesses! my number was \(secretNumber)."
             messageSymbol = "xmark.octagon.fill"
             messageColor = Color.gray
             gameIsOver = true
         }
     }
+    
 
     // Makes the guess 10 smaller, but never smaller than the lowest number.
     func lowerGuessByTen() {
