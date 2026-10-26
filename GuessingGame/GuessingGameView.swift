@@ -13,6 +13,7 @@ import SwiftUI
 // so that every part of the game below can use them.
 let lowestNumber: Int = 1
 let maximumGuesses: Int = 7
+let maximumHints: Int = 3
 
 enum GameDifficulty: String, CaseIterable, Identifiable {
     case easy
@@ -73,8 +74,9 @@ struct GuessingGameView: View {
     // The guess the player is about to make. It starts in the middle.
     @State var guess: Int = 50
     
-    // How many guesses the player has made in this game.
+    // How many guesses and hints the player has used in this game.
     @State var guessCount: Int = 0
+    @State var hintCount: Int = 0
 
     // Keep a separate best score for each difficulty during this app session.
     @State private var bestEasyScore: Int = 0
@@ -98,6 +100,10 @@ struct GuessingGameView: View {
     @State var gameIsOver: Bool = false
     
     // MARK: - Computed properties
+
+    var hintMidpoint: Int {
+        (lowestNumber + difficulty.highestNumber) / 2
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -185,6 +191,13 @@ struct GuessingGameView: View {
                 }
                 .buttonStyle(.borderedProminent)
             }
+
+            Button("Hint: above or below \(hintMidpoint)", systemImage: "lightbulb.fill") {
+                giveHint()
+            }
+            .buttonStyle(.bordered)
+            .tint(.purple)
+            .disabled(gameIsOver || hintCount >= maximumHints)
             
             VStack(spacing: 4) {
                 HStack {
@@ -213,6 +226,30 @@ struct GuessingGameView: View {
         .frame(minWidth: 420, minHeight: 640)
     }
     
+    // A midpoint hint costs one guess and can be used at most three times.
+    func giveHint() {
+        guessCount += 1
+        hintCount += 1
+
+        if secretNumber > hintMidpoint {
+            message = "My number is above \(hintMidpoint)."
+        } else if secretNumber < hintMidpoint {
+            message = "My number is below \(hintMidpoint)."
+        } else {
+            message = "My number is exactly \(hintMidpoint)."
+        }
+
+        messageSymbol = "lightbulb.max.fill"
+        messageColor = Color.purple
+
+        if guessCount >= maximumGuesses {
+            message = "Out of guesses! My number was \(secretNumber)."
+            messageSymbol = "xmark.octagon.fill"
+            messageColor = Color.gray
+            gameIsOver = true
+        }
+    }
+
     // MARK: - Functions
     // Calculates the distance between the current guess and the secret number
     func distance(from currentGuess: Int, to targetSecret: Int) -> Int {
@@ -309,6 +346,7 @@ struct GuessingGameView: View {
         secretNumber = Int.random(in: lowestNumber...difficulty.highestNumber)
         guess = (lowestNumber + difficulty.highestNumber) / 2
         guessCount = 0
+        hintCount = 0
         message = "I'm thinking of a new number from \(lowestNumber) to \(difficulty.highestNumber)."
         messageSymbol = "questionmark.circle.fill"
         messageColor = Color.indigo
