@@ -5,6 +5,7 @@
 //  Choose Easy (1–10), Medium (1–100), or Hard (1–1000).
 //  The game changes its number range and hot/warm distances by level.
 //  Each difficulty keeps its own best score while the app is open.
+//  The attempt counter warns the player when only two guesses remain.
 //
 
 import SwiftUI
@@ -104,6 +105,14 @@ struct GuessingGameView: View {
     var hintMidpoint: Int {
         (lowestNumber + difficulty.highestNumber) / 2
     }
+
+    var guessesLeft: Int {
+        max(0, maximumGuesses - guessCount)
+    }
+
+    var lowGuesses: Bool {
+        guessesLeft <= 2 && !gameIsOver
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -201,9 +210,17 @@ struct GuessingGameView: View {
             
             VStack(spacing: 4) {
                 HStack {
-                    Image(systemName: "list.number")
-                    Text("Guesses so far: \(guessCount) of \(maximumGuesses)")
+                    Image(systemName: lowGuesses ? "exclamationmark.triangle.fill" : "list.number")
+                        .scaleEffect(lowGuesses ? 1.15 : 1.0)
+                        .animation(
+                            lowGuesses
+                                ? .easeInOut(duration: 0.6).repeatForever(autoreverses: true)
+                                : .default,
+                            value: lowGuesses
+                        )
+                    Text("Guesses left: \(guessesLeft) of \(maximumGuesses)")
                 }
+                .foregroundStyle(lowGuesses ? Color.red : Color.secondary)
                 
                 if bestScore > 0 {
                     HStack {
