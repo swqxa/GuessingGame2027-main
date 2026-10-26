@@ -2,27 +2,57 @@
 //  GuessingGameView.swift
 //  GuessingGame
 //
-//  WHAT THIS GAME DOES NOW
-//  The app picks a secret whole number from 1 to 100.
-//  You choose a guess with the buttons and click Guess.
-//  The app tells you if your guess is right or not right,
-//  and it counts your guesses. When you find the number,
-//  you can play again.
-//
-//  WHAT IT DOES NOT DO YET
-//  It does not tell you if your guess is too high or too low.
-//  That part is up to you.
+//  Choose Easy (1–10), Medium (1–100), or Hard (1–1000).
+//  The game changes its number range and hot/warm distances by level.
+//  Each difficulty keeps its own best score while the app is open.
 //
 
 import SwiftUI
 
 // The game's settings. They sit up here, outside the game,
 // so that every part of the game below can use them.
-// TRY: Change highestNumber to 10 for an easy game, or to 1000 for a hard one.
 let lowestNumber: Int = 1
-let highestNumber: Int = 100
-
 let maximumGuesses: Int = 7
+
+enum GameDifficulty: String, CaseIterable, Identifiable {
+    case easy
+    case medium
+    case hard
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .easy: return "Easy"
+        case .medium: return "Medium"
+        case .hard: return "Hard"
+        }
+    }
+
+    var highestNumber: Int {
+        switch self {
+        case .easy: return 10
+        case .medium: return 100
+        case .hard: return 1000
+        }
+    }
+
+    var hotDistance: Int {
+        switch self {
+        case .easy: return 1
+        case .medium: return 5
+        case .hard: return 50
+        }
+    }
+
+    var warmDistance: Int {
+        switch self {
+        case .easy: return 2
+        case .medium: return 15
+        case .hard: return 150
+        }
+    }
+}
 
 // The game itself: what it remembers, what it shows on the screen,
 // and what it does when you click a button.
@@ -34,19 +64,33 @@ struct GuessingGameView: View {
     // Each @State variable is something the game remembers.
     // When one of them changes, the screen updates by itself.
     
-    // The number the player is trying to find. The app picks it at random.
-    @State var secretNumber: Int = Int.random(in: lowestNumber...highestNumber)
+    // The selected difficulty controls the number range and hint distances.
+    @State var difficulty: GameDifficulty = .medium
+
+    // The secret number is randomly selected from the chosen range.
+    @State var secretNumber: Int = Int.random(in: lowestNumber...GameDifficulty.medium.highestNumber)
     
     // The guess the player is about to make. It starts in the middle.
-    @State var guess: Int = (lowestNumber + highestNumber) / 2
+    @State var guess: Int = 50
     
     // How many guesses the player has made in this game.
     @State var guessCount: Int = 0
-    
-    @State var bestScore: Int = 999
+
+    // Keep a separate best score for each difficulty during this app session.
+    @State private var bestEasyScore: Int = 0
+    @State private var bestMediumScore: Int = 0
+    @State private var bestHardScore: Int = 0
+
+    var bestScore: Int {
+        switch difficulty {
+        case .easy: return bestEasyScore
+        case .medium: return bestMediumScore
+        case .hard: return bestHardScore
+        }
+    }
     
     // The message shown to the player, with a symbol and a colour to match it.
-    @State var message: String = "I'm thinking of a number from \(lowestNumber) to \(highestNumber)."
+    @State var message: String = "I'm thinking of a number from 1 to 100."
     @State var messageSymbol: String = "questionmark.circle.fill"
     @State var messageColor: Color = Color.indigo
     
@@ -69,6 +113,17 @@ struct GuessingGameView: View {
             // Shrink the title a little if it does not fit on one line.
             .lineLimit(1)
             .minimumScaleFactor(0.5)
+
+            Picker("Difficulty", selection: $difficulty) {
+                ForEach(GameDifficulty.allCases) { level in
+                    Text("\(level.title) (1–\(level.highestNumber))")
+                        .tag(level)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: difficulty) { _, _ in
+                startNewGame()
+            }
             
             Spacer()
             
@@ -137,10 +192,10 @@ struct GuessingGameView: View {
                     Text("Guesses so far: \(guessCount) of \(maximumGuesses)")
                 }
                 
-                if bestScore != 999 {
+                if bestScore > 0 {
                     HStack {
                         Image(systemName: "trophy.fill")
-                        Text("Best Score: \(bestScore) guesses")
+                        Text("Best Score (\(difficulty.title)): \(bestScore) guesses")
                     }
                     .foregroundStyle(Color.orange)
                 }
@@ -172,25 +227,25 @@ struct GuessingGameView: View {
         guessCount += 1
         
         if guess == secretNumber {
-            if guessCount < bestScore{
-                bestScore = guessCount
-                message = "new record! you found \(secretNumber) in \(guessCount) guesses"
-                
+            messageSymbol = "star.circle.fill"
+            messageColor = Color.green
+            gameIsOver = true
+
+            if bestScore == 0 || guessCount < bestScore {
+                saveBestScore(guessCount)
+                message = "New record! You found \(secretNumber) in \(guessCount) guesses."
             } else {
-                message = "Yes! \(secretNumber) is my number."
-                messageSymbol = "star.circle.fill"
-                messageColor = Color.green
-                gameIsOver = true
+                message = "Yes! My number is \(secretNumber)."
             }
         } else {
             // Calculate distance using our helper function
             let howFarAway: Int = distance(from: guess, to: secretNumber)
             
-            if howFarAway <= 5 {
+            if howFarAway <= difficulty.hotDistance {
                 message = "\(guess) is hot! (very close)"
                 messageSymbol = "flame.fill"
                 messageColor = Color.red
-            } else if howFarAway <= 15 {
+            } else if howFarAway <= difficulty.warmDistance {
                 message = "\(guess) is warmer (coming closer)"
                 messageSymbol = "thermometer.medium"
                 messageColor = Color.orange
@@ -208,8 +263,15 @@ struct GuessingGameView: View {
             gameIsOver = true
         }
     }
-    
-    
+
+    func saveBestScore(_ score: Int) {
+        switch difficulty {
+        case .easy: bestEasyScore = score
+        case .medium: bestMediumScore = score
+        case .hard: bestHardScore = score
+        }
+    }
+
     // Makes the guess 10 smaller, but never smaller than the lowest number.
     func lowerGuessByTen() {
         guess -= 10
@@ -229,25 +291,25 @@ struct GuessingGameView: View {
     // Makes the guess 1 bigger, but never bigger than the highest number.
     func raiseGuessByOne() {
         guess += 1
-        if guess > highestNumber {
-            guess = highestNumber
+        if guess > difficulty.highestNumber {
+            guess = difficulty.highestNumber
         }
     }
     
     // Makes the guess 10 bigger, but never bigger than the highest number.
     func raiseGuessByTen() {
         guess += 10
-        if guess > highestNumber {
-            guess = highestNumber
+        if guess > difficulty.highestNumber {
+            guess = difficulty.highestNumber
         }
     }
     
     // Picks a new secret number and resets everything else.
     func startNewGame() {
-        secretNumber = Int.random(in: lowestNumber...highestNumber)
-        guess = (lowestNumber + highestNumber) / 2
+        secretNumber = Int.random(in: lowestNumber...difficulty.highestNumber)
+        guess = (lowestNumber + difficulty.highestNumber) / 2
         guessCount = 0
-        message = "I'm thinking of a new number from \(lowestNumber) to \(highestNumber)."
+        message = "I'm thinking of a new number from \(lowestNumber) to \(difficulty.highestNumber)."
         messageSymbol = "questionmark.circle.fill"
         messageColor = Color.indigo
         gameIsOver = false
