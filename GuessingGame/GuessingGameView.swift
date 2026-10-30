@@ -361,7 +361,7 @@ struct GuessingGameView: View {
     // Picks a new secret number and resets everything else.
     func startNewGame() {
         secretNumber = Int.random(in: lowestNumber...difficulty.highestNumber)
-        guess = (lowestNumber + difficulty.highestNumber) / 2
+        guess = hintMidpoint
         guessCount = 0
         hintCount = 0
         message = "I'm thinking of a new number from \(lowestNumber) to \(difficulty.highestNumber)."
