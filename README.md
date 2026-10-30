@@ -33,17 +33,19 @@ The main game code is in GuessingGame/GuessingGameView.swift.
 
 ## Testing
 
-For repeatable checks, temporarily replace **both** random-number assignments for secretNumber in GuessingGameView.swift—the initial value and the assignment in startNewGame()—with the fixed number listed for that check. Use a number inside the selected level's range. Restore both random assignments after testing.
+For repeatable checks, I temporarily used Easy = 6, Medium = 42, and Hard = 500. I marked the initial secret and the fixed values in `startNewGame()` with `// FOR TESTING ONLY`. After testing, I restored both random-number assignments.
 
-| Check | Fixed number and steps | Expected result |
-|---|---|---|
-| Difficulty ranges | Select Easy, Medium, then Hard. | The picker shows 1–10, 1–100, and 1–1,000. Each level starts a new round with the guess at its midpoint. |
-| Midpoint hint | Test Easy with 6, Medium with 42, and Hard with 500. Use a hint at each level. | The messages say above 5, below 50, and exactly 500. Each hint uses one attempt. After three hints the button is disabled. |
-| Hot/warm/cold boundaries | Easy: secret 5, guess 4/3/2. Medium: secret 42, guess 37/27/26. Hard: secret 500, guess 450/350/349. Start a fresh round between guesses. | Easy distances 1/2/3, Medium 5/15/16, and Hard 50/150/151 produce hot/warm/cold feedback respectively. |
-| Low attempts and final loss | Medium: secret 42. Make five incorrect guesses, then a sixth, then a seventh. | At five guesses used, the counter shows 2 left in red with a pulsing warning. At six guesses it shows 1 left. The seventh incorrect guess ends the game and reveals 42. |
-| Win on the last attempt | Medium: secret 42. Make six incorrect guesses, then guess 42. | The seventh attempt wins the game and updates the Medium best score if it is a new record. |
-| Best scores by level | Win once on each difficulty, then switch between levels while the app remains open. Close and reopen the app. | Each level displays its own score during the session. After reopening, the scores reset. |
-
+| Test | Chosen input | Should happen | Did happen |
+|---|---|---|---|
+| Difficulty ranges | Fixed secrets: Easy 6, Medium 42, Hard 500. Select each level. | The picker shows 1–10, 1–100, and 1–1,000; the starting guess is 5, 50, and 500. Changing levels starts a new round. | Passed — all three ranges and midpoint guesses appeared, and the round reset when the level changed. |
+| Midpoint hint | Easy secret 6; Medium 42; Hard 500. Request one hint on each level, then use three hints in one round. | The messages say above 5, below 50, and exactly 500. Each hint uses one attempt; after three, the hint button is disabled. | Passed — all three messages appeared; the counter dropped by one per hint, and the button disabled after the third. |
+| Hot, warm, and cold boundaries | Easy secret 6: guess 5/4/3. Medium secret 42: 37/27/26. Hard secret 500: 450/350/349. Start a new round between guesses. | The distances at each level's hot and warm limits show hot/warm; one farther shows cold. | Passed — each level showed hot, warm, and cold at the stated distances. |
+| Low attempts and final loss | Medium secret 42. Make seven wrong guesses, checking after guesses 4, 5, 6, and 7. | At 3 left the counter is grey; at 2 and 1 left it is red with a warning icon; the seventh wrong guess ends the game and reveals 42. | Passed — 3 left stayed grey; 2 and 1 left were red; the last guess revealed 42 and turned the warning off. |
+| Win on the last attempt | Medium secret 42. Make six wrong guesses, then guess 42. | The seventh guess wins; the best score updates only if this beats the current record. | Passed — the seventh guess won and showed “Yes! My number is 42.” because the existing record was already 1. |
+| Best scores by level | Win in one guess on Easy (6), Medium (42), and Hard (500); switch levels; stop and restart the app. | Each level shows its own score. Scores reset after the app closes. | Passed — each level showed its own one-guess record; after restart no score was displayed. |
+| Just past hot on Medium (edge) | Medium secret fixed at 42. Guess 48 (distance 6). | “48 is warmer (coming closer)” | Passed — the game showed “48 is warmer (coming closer)”. |
+| A win that is not a record | Medium secret 42. Win in 1 guess, click Play Again, make one wrong guess, then win in 2. | The second win says “Yes!” and leaves the 1-guess record unchanged. | Passed — the first win showed “New record!”; the second showed “Yes! My number is 42.” and kept the record at 1. |
+| Three guesses left (edge) | Medium secret fixed at 42. Make four wrong guesses. | The counter shows 3 of 7 in grey without the warning icon. | Passed — the counter showed 3 of 7 in grey with the normal list icon. |
 ## Credits
 
 Starter game: Mr. Gordon, ICS3U at Lakefield College School.
