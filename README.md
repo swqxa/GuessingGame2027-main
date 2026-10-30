@@ -12,6 +12,14 @@ The game starts with a guess at the middle of the selected range. Use **−10**,
 
 You can request up to three hints in a round. Each hint tells you whether the secret number is above, below, or exactly at the range midpoint (5, 50, or 500), and each hint uses one attempt. When two or fewer attempts remain, the counter turns red and its warning icon pulses. The game keeps a separate best score for each difficulty while the app is open; scores reset when the app closes. Changing difficulty or selecting **Play Again** starts a new round.
 
+## What I added
+
+- **Hot, warm, and cold hints:** The game compares how far each guess is from the secret number and shows matching text, colour, and symbol.
+- **Difficulty levels:** Easy uses 1–10, Medium 1–100, and Hard 1–1,000, with hint distances scaled for each range.
+- **Best score:** Each level has its own best number of guesses for the current app session, and a better result shows “New record!”.
+- **Midpoint hint:** Up to three hints per round tell whether the secret is above, below, or exactly at the midpoint; each one costs a guess.
+- **Running low:** With two or fewer guesses left, the counter turns red and a warning symbol pulses.
+
 ## How to run the game
 
 1. Open GuessingGame.xcodeproj in Xcode.
