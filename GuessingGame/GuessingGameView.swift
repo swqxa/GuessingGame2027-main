@@ -247,6 +247,8 @@ struct GuessingGameView: View {
         .frame(minWidth: 420, minHeight: 640)
     }
     
+    // MARK: - Functions
+
     // A midpoint hint costs one guess and can be used at most three times.
     func giveHint() {
         guessCount += 1
@@ -271,7 +273,6 @@ struct GuessingGameView: View {
         }
     }
 
-    // MARK: - Functions
     // Calculates the distance between the current guess and the secret number
     func distance(from currentGuess: Int, to targetSecret: Int) -> Int {
         if currentGuess > targetSecret {
