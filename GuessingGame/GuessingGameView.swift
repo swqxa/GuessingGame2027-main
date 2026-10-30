@@ -84,6 +84,7 @@ struct GuessingGameView: View {
     @State private var bestMediumScore: Int = 0
     @State private var bestHardScore: Int = 0
 
+    // The best score for the currently selected difficulty.
     var bestScore: Int {
         switch difficulty {
         case .easy: return bestEasyScore
@@ -102,14 +103,17 @@ struct GuessingGameView: View {
     
     // MARK: - Computed properties
 
+    // The midpoint of the selected range, used for hints and the starting guess.
     var hintMidpoint: Int {
         (lowestNumber + difficulty.highestNumber) / 2
     }
 
+    // The number of guesses the player can still make.
     var guessesLeft: Int {
         max(0, maximumGuesses - guessCount)
     }
 
+    // True while two or fewer guesses remain and the game is still active.
     var lowGuesses: Bool {
         guessesLeft <= 2 && !gameIsOver
     }
@@ -318,6 +322,7 @@ struct GuessingGameView: View {
         }
     }
 
+    // Saves the score for the currently selected difficulty.
     func saveBestScore(_ score: Int) {
         switch difficulty {
         case .easy: bestEasyScore = score
