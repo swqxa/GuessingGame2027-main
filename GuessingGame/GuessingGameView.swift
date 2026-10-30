@@ -241,9 +241,7 @@ struct GuessingGameView: View {
         .font(.title2)
         .fontDesign(.rounded)
         .controlSize(.large)
-        // TRY: Change indigo to another colour, such as teal, pink or orange.
         .tint(Color.indigo)
-        // How big the game's window is on the Mac. It can be made taller or wider.
         .frame(minWidth: 420, minHeight: 640)
     }
     
