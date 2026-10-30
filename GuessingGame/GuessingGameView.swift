@@ -315,7 +315,7 @@ struct GuessingGameView: View {
         }
         
         if guess != secretNumber && guessCount >= maximumGuesses {
-            message = "out of guesses! my number was \(secretNumber)."
+            message = "Out of guesses! My number was \(secretNumber)."
             messageSymbol = "xmark.octagon.fill"
             messageColor = Color.gray
             gameIsOver = true
